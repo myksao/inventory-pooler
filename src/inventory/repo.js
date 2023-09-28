@@ -140,7 +140,7 @@ exports.updateStock = async (data) => {
 exports.deleteStock = async (data) => {
   try {
     await sequelize.transaction(async (transaction) => {
-      const checkIfInventoryExists = await Inventory.findOne({
+      const inventory = await Inventory.findOne({
         where: {
           batchNumber: data.batchNumber,
           id: data.id,
@@ -152,15 +152,11 @@ exports.deleteStock = async (data) => {
         throw new Error("Batch number does not exist");
       }
 
-      await Inventory.update(
+      await inventory.update(
         {
           isDeleted: true,
         },
         {
-          where: {
-            batchNumber: data.batchNumber,
-            id: checkIfInventoryExists.id,
-          },
           transaction,
         }
       );
