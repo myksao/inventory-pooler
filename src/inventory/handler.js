@@ -112,6 +112,7 @@ exports.fetchStock = async (req, res) => {
     const data = await repo.fetchStock({
       batchNumber,
       id,
+      req,
     });
 
     return res.status(200).json({

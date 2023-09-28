@@ -1,4 +1,5 @@
 require("dotenv").config();
+require("./cron")
 const sequelize = require("../config/database");
 const express = require("express");
 const inventoryRouter = require("./inventory/routes");

@@ -1,5 +1,6 @@
 const sequelize = require("../../config/database");
 const { Inventory, InventoryBatch } = require("../model").inventory;
+const { ifEmpty, paginationLinks } = require("../utils");
 
 exports.createStock = async (data) => {
   try {
@@ -169,22 +170,45 @@ exports.deleteStock = async (data) => {
 
 exports.fetchStock = async (data) => {
   try {
-    const inventory = await Inventory.findAll({
-      where: {
-        isDeleted: false,
-        batchNumber: data.batchNumber,
-        id: data.id,
-      },
-      limit: data.limit,
-      offset: data.offset,
-      include: [
-        {
-          model: InventoryBatch,
-        },
-      ],
-    });
+    const { pageNo, noOfRows } = data;
 
-    return inventory;
+    const paginationLimit = ifEmpty(noOfRows) ? null : noOfRows;
+    const page = ifEmpty(pageNo) ? null : pageNo;
+    let limit = paginationLimit;
+    let offset = (page - 1) * limit;
+
+    const [inventory, total] = await Promise.all([
+      Inventory.findAll({
+        where: {
+          isDeleted: false,
+        },
+        limit: limit,
+        offset: offset,
+        include: [
+          {
+            model: InventoryBatch,
+          },
+        ],
+      }),
+      Inventory.count({
+        where: {
+          isDeleted: false,
+        },
+      }),
+    ]);
+
+    const path = `${data.req.protocol}://${data.req.get("host")}${
+      data.req.baseUrl
+    }${data.req.path}`;
+    const currentUrl = `${data.req.protocol}://${data.req.get("host")}${
+      data.req.originalUrl
+    }`;
+    const links = paginationLinks(path, currentUrl, total, page, limit);
+
+    return {
+      inventory,
+      links,
+    };
   } catch (error) {
     console.log(error);
     throw error;

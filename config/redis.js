@@ -1,7 +1,10 @@
 const { Redis } = require("ioredis");
+const config = require("./app");
 const { Queue, Worker } = require("bullmq");
 
-const connection = new Redis();
+const connection = new Redis(config.redis_port, config.redis_host, {
+  password: config.redis_password,
+});
 
 const createStockQ = new Queue("createStock", {
   connection,
