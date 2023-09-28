@@ -1,0 +1,10 @@
+node_modules
+.jshintrc
+.env
+.vscode
+.DS_Store
+.idea
+.github/workflows
+.history
+package-lock.json
+thunder-tests
